@@ -1,1 +1,82 @@
 
+import React, { Component } from 'react';
+import { DataGrid } from 'react-data-grid';
+import 'react-data-grid/dist/react-data-grid.css';
+
+class ExampleGrid extends Component {
+  constructor(props) {
+    super(props);
+    this.state = {
+      rows: [
+        { id: 1, name: 'John', age: 25 },
+        { id: 2, name: 'Jane', age: 30 },
+        { id: 3, name: 'Doe', age: 40 },
+      ],
+      sortColumn: null,
+      sortDirection: 'NONE',
+      filters: {},
+    };
+  }
+
+  handleSort = (columnKey, direction) => {
+    this.setState({ sortColumn: columnKey, sortDirection: direction });
+  };
+
+  handleFilterChange = (columnKey, value) => {
+    this.setState((prevState) => ({
+      filters: { ...prevState.filters, [columnKey]: value },
+    }));
+  };
+
+  render() {
+    const { rows, sortColumn, sortDirection, filters } = this.state;
+
+    const FilterInput = ({ columnKey }) => (
+      <input
+        type="text"
+        onChange={(e) => this.handleFilterChange(columnKey, e.target.value)}
+        placeholder={`Filter ${columnKey}`}
+      />
+    );
+
+    const filteredRows = rows.filter((row) =>
+      Object.entries(filters).every(([key, value]) =>
+        row[key].toString().toLowerCase().includes(value.toLowerCase())
+      )
+    );
+
+    return (
+      <div>
+        <DataGrid
+          columns={[
+            {
+              key: 'id',
+              name: 'ID',
+              width: 100,
+              sortable: true,
+              filterRenderer: () => <FilterInput columnKey="id" />,
+            },
+            {
+              key: 'name',
+              name: 'Name',
+              width: 200,
+              sortable: true,
+              filterRenderer: () => <FilterInput columnKey="name" />,
+            },
+            {
+              key: 'age',
+              name: 'Age',
+              width: 100,
+              sortable: true,
+              filterRenderer: () => <FilterInput columnKey="age" />,
+            },
+          ]}
+          rows={filteredRows}
+          sortColumn={sortColumn}
+          sortDirection={sortDirection}
+          onSort={(columnKey, direction) => this.handleSort(columnKey, direction)}
+        />
+      </div>
+    );
+  }
+}
